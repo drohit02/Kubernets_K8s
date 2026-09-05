@@ -1,0 +1,28 @@
+apiVersion: v1               # core API group — RC is a v1 resource (not apps/v1)
+kind: ReplicationController  # case-sensitive; note: RC is legacy — prefer ReplicaSet/Deployment
+metadata:
+  name: nginx-rc             # DNS-1123: lowercase, hyphens only, ≤253 chars
+  namespace: default         # optional — defaults to "default"
+  labels:
+    app: nginx-app           # labels on the RC itself (not the pod selector)
+spec:
+  replicas: 3                # desired number of pod copies running at all times
+  selector:                  # RC finds its pods using this label match
+    app: nginx-app           # must match template.metadata.labels exactly (no matchLabels — RC uses equality only)
+  template:                  # pod blueprint — RC creates pods from this template
+    metadata:
+      labels:
+        app: nginx-app       # MUST match spec.selector above — RC won't own pods without this
+    spec:
+      containers:
+        - name: nginx-container      # unique name within this pod
+          image: nginx:1.25          # always pin a version — never use :latest
+          ports:
+            - containerPort: 80      # informational only — does not open a firewall rule
+          resources:
+            requests:
+              cpu: "100m"            # 0.1 CPU — used by scheduler to place the pod
+              memory: "64Mi"         # minimum memory guaranteed
+            limits:
+              cpu: "200m"            # hard cap — throttled if exceeded
+              memory: "128Mi"        # hard cap — OOMKilled if exceeded
