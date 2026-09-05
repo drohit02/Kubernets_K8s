@@ -1,0 +1,12 @@
+apiVersion: v1 # Kubernetes have set of rules for the api-versions and predefinied it.Check with the kubectl api-versions
+kind: Pod # Naming convention is case-sensitive and after the colon(:) requires space and needs to check the kind attributes valid value
+metadata: 
+  name: simple-pod-webappo
+  labels:
+    app: nginx-app
+spec:
+  containers:
+    - name: nginx-webapp # after the hyper(-) space is also required
+      image: nginx:1.25  # actaul image path use for the pod
+      ports: 
+       - containerPort: 80
