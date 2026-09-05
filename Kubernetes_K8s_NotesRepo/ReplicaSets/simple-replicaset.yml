@@ -1,0 +1,31 @@
+apiVersion: apps/v1          # 🔴 apps/v1 — NOT v1 like ReplicationController
+kind: ReplicaSet             # case-sensitive PascalCase
+metadata:
+  name: nginx-rs             # DNS-1123: lowercase, hyphens only, ≤253 chars
+  namespace: default         # optional — defaults to "default"
+  labels:
+    app: nginx-app           # labels on the RS object itself (not the pod selector)
+spec:
+  replicas: 3                # desired number of pod replicas running at all times (default: 1)
+  selector:                  # 🔴 set-based selector — how RS finds its pods
+    matchLabels:             # equality match (equivalent to RC's flat key:value)
+      app: nginx-app         # pods must have this label to be owned by this RS
+      tier: frontend         # multiple matchLabels = AND condition
+  template:                  # 🔴 pod blueprint — RS creates pods from this
+    metadata:
+      labels:
+        app: nginx-app       # 🔴 MUST satisfy spec.selector — RS validation will reject mismatch
+        tier: frontend       # every label in matchLabels must appear here
+    spec:
+      containers:
+        - name: nginx-container      # unique name within this pod
+          image: nginx:1.25          # always pin version — never :latest
+          ports:
+            - containerPort: 80      # informational only — no firewall effect
+          resources:
+            requests:
+              cpu: "100m"            # 0.1 CPU core — used by scheduler
+              memory: "64Mi"         # guaranteed minimum memory
+            limits:
+              cpu: "250m"            # throttled if exceeded
+              memory: "128Mi"        # OOMKilled if exceeded
